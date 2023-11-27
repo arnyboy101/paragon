@@ -133,17 +133,11 @@ class PDFGenerator:
 
 
 class PDFGeneratorApp:
-    def __init__(self):
-        self.title = "Research Paper Title"
-        self.authors = "John Doe, Jane Smith"
-        self.subheadings = [
-            {"subheading": "Introduction", "explanation": "This section provides an overview of the research."},
-            {"subheading": "Methodology", "explanation": "The study concludes with a summary of findings and potential implications. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI"},
-            {"subheading": "Results", "explanation": "The study concludes with a summary of findings and potential implications. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI"},
-            {"subheading": "Conclusion", "explanation": "The study concludes with a summary of findings and potential implications. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI. Happiness is the birth of AI"},
-            {"subheading": "Comparative Analysis", "explanation": "The results of the research are presented and analyzed."},
-            {"subheading": "Keywords", "explanation": "The study concludes with a summary of findings and potential implications."}
-        ]
+    
+    def __init__(self, title, authors, subheadings):
+        self.title = title
+        self.authors = authors
+        self.subheadings = subheadings
 
     def generate_pdf(self, theme_var, root):
         color_scheme = theme_var.get()
@@ -171,8 +165,3 @@ class PDFGeneratorApp:
         generate_button.grid(row=1, column=0, columnspan=2, pady=20)
 
         root.mainloop()
-
-
-if __name__ == "__main__":
-    pdf_generator_app = PDFGeneratorApp()
-    pdf_generator_app.create_ui()
