@@ -1,0 +1,15 @@
+evaluate
+future
+ipykernel
+ipywidgets
+macholib
+matplotlib
+networkx
+pip
+pipdeptree
+pipreqs
+pygame
+reportlab
+rouge-score
+tensorflow
+transformers
