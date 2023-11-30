@@ -2,8 +2,67 @@ from flask import Flask, render_template, request, jsonify
 from ocr import ParsePDF
 from generate_pdf import PDFGenerator
 from summarize import TextSummarizer
+from speech import TextToSpeechConverter  # Import the TextToSpeechConverter class
 
 app = Flask(__name__)
+
+# Global variable to store summarize_dict output
+summarize_dict_output = None
+
+def summarize_dict(data_dict):
+    title = data_dict.get("title", "Default Title")
+    authors = data_dict.get("authors", "Default Authors")
+    subheadings = data_dict.get("subheadings", [])
+    color_scheme = data_dict.get("color_scheme", "Evening")
+    output_folder = data_dict.get("output_folder", "./output")
+
+    summarizer = TextSummarizer()
+
+    for subheading_data in subheadings:
+        explanation = subheading_data.get("explanation", "")
+        summarized_explanation = summarizer.summarize(explanation)
+        subheading_data["explanation"] = summarized_explanation
+
+    global summarize_dict_output
+    summarize_dict_output = {
+        "title": title,
+        "authors": authors,
+        "subheadings": subheadings,
+        "color_scheme": color_scheme,
+        "output_folder": output_folder
+    }
+
+    return summarize_dict_output
+
+def process_pdf(file_path):
+    ocr = ParsePDF()
+    generation_data = ocr.convert_to_summarize_format(file_path)
+    generation_data = summarize_dict(generation_data)
+    
+    pdfmaker = PDFGenerator(
+        title=generation_data['title'],
+        authors=generation_data['authors'],
+        subheadings=generation_data['subheadings']
+    )
+    pdfmaker.generate_pdf(generation_data)
+
+    return generation_data
+
+def audio_helper():
+    global summarize_dict_output
+
+    if summarize_dict_output is not None:
+        full_text = ""
+        for subheading_data in summarize_dict_output["subheadings"]:
+            full_text += f"{subheading_data['subheading']}. {subheading_data['explanation']} "
+
+        # Convert the full text to audio
+        converter = TextToSpeechConverter(full_text, output_dir='audio_output', language='en')
+        audio_file_path = converter.convert_to_audio(filename='output_audio.mp3')
+
+        return audio_file_path
+
+    return None
 
 @app.route('/')
 def index():
@@ -32,41 +91,19 @@ def upload():
     except Exception as e:
         return jsonify({"error": str(e)})
 
-def process_pdf(file_path):
-    ocr = ParsePDF()
-    generation_data = ocr.convert_to_summarize_format(file_path)
-    generation_data = summarize_dict(generation_data)
-    
-    pdfmaker = PDFGenerator(
-        title=generation_data['title'],
-        authors=generation_data['authors'],
-        subheadings=generation_data['subheadings']
-    )
-    pdfmaker.generate_pdf(generation_data)
+@app.route('/play_audio', methods=['POST'])
+def play_audio():
+    global summarize_dict_output
 
-    return generation_data
+    if summarize_dict_output is not None:
+        audio_file_path = audio_helper()
 
-def summarize_dict(data_dict):
-    title = data_dict.get("title", "Default Title")
-    authors = data_dict.get("authors", "Default Authors")
-    subheadings = data_dict.get("subheadings", [])
-    color_scheme = data_dict.get("color_scheme", "Evening")
-    output_folder = data_dict.get("output_folder", "./output")
+        if audio_file_path is not None:
+            return jsonify({"success": True, "audio_file_path": audio_file_path})
+        else:
+            return jsonify({"error": "Failed to convert to audio"})
 
-    summarizer = TextSummarizer()
-
-    for subheading_data in subheadings:
-        explanation = subheading_data.get("explanation", "")
-        summarized_explanation = summarizer.summarize(explanation)
-        subheading_data["explanation"] = summarized_explanation
-
-    return {
-        "title": title,
-        "authors": authors,
-        "subheadings": subheadings,
-        "color_scheme": color_scheme,
-        "output_folder": output_folder
-    }
+    return jsonify({"error": "No data to convert"})
 
 if __name__ == '__main__':
     app.run(debug=True)

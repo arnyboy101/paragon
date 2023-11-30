@@ -37,3 +37,4 @@ summarize/output/checkpoint-3003.zip
 *.pdf
 *.png
 ocr/figures/data/sample.json
+*.mp3

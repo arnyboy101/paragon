@@ -20,6 +20,8 @@
 
     <div id="resultBox" style="display: none;">
         <p>PDF processed successfully!</p>
+        <button id="playAudioButton">Play audio</button>
+        <p id="infographicSavedMessage" style="display: none;">Infographic saved to <strong>./output</strong> directory</p>
     </div>
 
     <script>
@@ -39,6 +41,36 @@
 
                 if (data.success) {
                     document.getElementById('resultBox').style.display = 'block';
+
+                    // Add event listener for the "Play Audio" button
+                    document.getElementById('playAudioButton').addEventListener('click', function() {
+                        // Display loading message during audio conversion
+                        document.getElementById('loadingBox').style.display = 'block';
+
+                        // Trigger the /play_audio endpoint
+                        fetch('/play_audio', {
+                            method: 'POST'
+                        })
+                        .then(response => response.json())
+                        .then(audioData => {
+                            document.getElementById('loadingBox').style.display = 'none';
+
+                            if (audioData.success) {
+                                // Placeholder for play audio functionality
+                                alert('Playing audio...');
+                            } else {
+                                alert('Error: ' + audioData.error);
+                            }
+                        })
+                        .catch(error => {
+                            document.getElementById('loadingBox').style.display = 'none';
+                            alert('Error: ' + error.message);
+                        });
+                    });
+
+                    // Display the infographic saved message
+                    var infographicSavedMessage = document.getElementById('infographicSavedMessage');
+                    infographicSavedMessage.style.display = 'block';
                 } else {
                     alert('Error: ' + data.error);
                 }
