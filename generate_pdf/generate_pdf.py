@@ -22,7 +22,8 @@ class PDFGenerator:
             "Evening": ("#c7cafc", "#5861fc"),
             "Lime": ("#c5fcd4", "#0afa4a"),
             "Miami": ("#fce1fc", "#f502ed"),
-            "Founder's Fav": ("#b9f0db", "#04b876")
+            "Founder's Fav": ("#b9f0db", "#04b876"),
+            "Urvish": ("#ffffff", "#000000")
         }
 
         if color_scheme not in color_schemes:
@@ -152,7 +153,7 @@ class PDFGeneratorApp:
         root.title("PDF Generator")
 
         theme_var = StringVar(root)
-        themes = ["Evening", "Lime", "Miami", "Founder's Fav"]
+        themes = ["Evening", "Lime", "Miami", "Founder's Fav", "Urvish"]
         theme_var.set(themes[0])
 
         generate_pdf_partial = partial(self.generate_pdf, theme_var, root)
