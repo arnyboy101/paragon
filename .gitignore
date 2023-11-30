@@ -36,3 +36,4 @@ output/runs/Nov28_19-50-22_Arnavs-MacBook-Pro.local/events.out.tfevents.17012190
 summarize/output/checkpoint-3003.zip
 *.pdf
 *.png
+ocr/figures/data/sample.json

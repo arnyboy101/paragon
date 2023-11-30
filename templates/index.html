@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paragon.ai</title>
+</head>
+<body>
+    <h1>Paragon.ai</h1>
+    <h2>Make your big ideas, bite-sized</h2>
+
+    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".pdf" required>
+        <button type="submit">Upload PDF</button>
+    </form>
+
+    <div id="loadingBox" style="display: none;">
+        <p>Loading...</p>
+    </div>
+
+    <div id="resultBox" style="display: none;">
+        <p>PDF processed successfully!</p>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            document.getElementById('loadingBox').style.display = 'block';
+
+            var formData = new FormData(this);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingBox').style.display = 'none';
+
+                if (data.success) {
+                    document.getElementById('resultBox').style.display = 'block';
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingBox').style.display = 'none';
+                alert('Error: ' + error.message);
+            });
+        });
+    </script>
+</body>
+</html>
