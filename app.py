@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from ocr import ParsePDF
-from generate_pdf import PDFGenerator
+from generate_html import HTMLGenerator  # Import HTMLGenerator instead of PDFGenerator
 from summarize import TextSummarizer
-from speech import TextToSpeechConverter  # Import the TextToSpeechConverter class
+from speech import TextToSpeechConverter
 
 app = Flask(__name__)
 
@@ -34,17 +34,17 @@ def summarize_dict(data_dict):
 
     return summarize_dict_output
 
-def process_pdf(file_path):
+def process_html(file_path):  # Update function name to reflect HTML generation
     ocr = ParsePDF()
     generation_data = ocr.convert_to_summarize_format(file_path)
     generation_data = summarize_dict(generation_data)
     
-    pdfmaker = PDFGenerator(
+    html_generator = HTMLGenerator(  # Use HTMLGenerator instead of PDFGenerator
         title=generation_data['title'],
         authors=generation_data['authors'],
         subheadings=generation_data['subheadings']
     )
-    pdfmaker.generate_pdf(generation_data)
+    html_generator.generate_html(generation_data)
 
     return generation_data
 
@@ -84,7 +84,7 @@ def upload():
         file.save(file_path)
 
         # Process the PDF
-        generation_data = process_pdf(file_path)
+        generation_data = process_html(file_path)
 
         return jsonify({"success": True, "file_path": file_path, "generation_data": generation_data})
 

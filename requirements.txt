@@ -1,9 +1,3 @@
-<<<<<<< Updated upstream
-flask
-reportlab
-summarizer
-gtts
-=======
 accelerate
 bert-extractive-summarizer
 boto3
@@ -30,4 +24,3 @@ sentencepiece
 tensorflow
 torchaudio
 torchvision
->>>>>>> Stashed changes
