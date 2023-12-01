@@ -1,4 +1,33 @@
+<<<<<<< Updated upstream
 flask
 reportlab
 summarizer
 gtts
+=======
+accelerate
+bert-extractive-summarizer
+boto3
+bs4
+en-core-web-sm
+evaluate
+flask
+future
+gTTS
+grobid-client-python
+ipykernel
+ipywidgets
+macholib
+matplotlib
+pip
+pipdeptree
+pipreqs
+pygame
+reportlab
+rouge-score
+sacremoses
+scipdf
+sentencepiece
+tensorflow
+torchaudio
+torchvision
+>>>>>>> Stashed changes
