@@ -58,6 +58,10 @@
         document.getElementById('uploadForm').addEventListener('submit', function (event) {
             event.preventDefault();
             document.getElementById('loadingBox').style.display = 'block';
+            var formElements = document.getElementById('uploadForm').elements;
+            for (var i = 0; i < formElements.length; i++) {
+                formElements[i].disabled = true;
+            }
 
             var formData = new FormData(this);
 
