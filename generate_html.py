@@ -86,7 +86,7 @@ class HTMLGenerator:
                     $(".card").hide();
                     $(".card").eq(currentCard).show();
 
-                    updateButtonVisibility();
+                    updateButtonVisibility(); // Call on page load to initialize the counter
 
                     $("#nextButton").click(function() {{
                         if (currentCard < totalCards - 1) {{
@@ -109,11 +109,13 @@ class HTMLGenerator:
                     function updateButtonVisibility() {{
                         $("#prevButton").toggle(currentCard > 0);
                         $("#nextButton").toggle(currentCard < totalCards - 1);
+                        $("#cardCounter").text((currentCard + 1) + " of " + totalCards); // Update the counter text
                     }}
-                }});
-            </script>
 
-            <title>{self.title} Infographic</title>
+                }});
+        </script>
+
+        <title>{self.title} Infographic</title>
         </head>
         <body>
             <div class="banner">
@@ -137,10 +139,11 @@ class HTMLGenerator:
 
         html_content += """
             </div>
-            <div style="text-align: center;">
+            <div style="text-align: center; margin-top: 10px;">
                 <button id="prevButton">Previous</button>
                 <button id="nextButton">Next</button>
             </div>
+            <div id="cardCounter" style="text-align: center; margin-top: 5px;"></div> <!-- Card counter display -->
         </body>
         </html>
         """
