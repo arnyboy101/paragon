@@ -125,16 +125,15 @@ class HTMLGenerator:
 
         # Add subheadings to HTML content
         for subheading_data in self.subheadings:
-            if len(subheading_data["explanation"].split(" ")) <= 5:
-                explanation_lines = self.wrap_text(subheading_data["explanation"], 14, 400 - 2 * 20)
-                explanation_text = "<br>".join(explanation_lines)
+            explanation_lines = self.wrap_text(subheading_data["explanation"], 14, 400 - 2 * 20)
+            explanation_text = "<br>".join(explanation_lines)
 
-                html_content += f"""
-                <div class="card">
-                    <div class="subheading">{subheading_data["subheading"]}</div>
-                    <div class="explanation">{explanation_text}</div>
-                </div>
-                """
+            html_content += f"""
+            <div class="card">
+                <div class="subheading">{subheading_data["subheading"]}</div>
+                <div class="explanation">{explanation_text}</div>
+            </div>
+            """
 
         html_content += """
             </div>
