@@ -85,6 +85,29 @@ class HTMLGenerator:
                 .explanation {{
                     font-size: 14px;
                 }}
+                .button {{
+                    background-color: {box_color}; /* Button color */
+                    color: white; /* Text color */
+                    border: none;
+                    padding: 10px 20px;
+                    text-align: center;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-size: 16px;
+                    margin: 4px 2px;
+                    transition-duration: 0.4s; /* Smooth transition for hover effect */
+                    cursor: pointer;
+                    border-radius: 5px; /* Rounded corners for buttons */
+                    box-shadow: 0 9px #999; /* Box shadow for a 3D effect */
+                }}
+
+                .button:hover {{
+                    background-color: #555; /* Button color on hover */
+                    color: white; /* Text color on hover */
+                    box-shadow: 0 5px #666; /* Box shadow on hover */
+                    transform: translateY(4px); /* Move the button up slightly on hover */
+                }}
+
             </style>
             <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
             <script>
@@ -147,8 +170,8 @@ class HTMLGenerator:
         html_content += """
             </div>
             <div style="text-align: center; margin-top: 10px;">
-                <button id="prevButton">Previous</button>
-                <button id="nextButton">Next</button>
+                <button id="prevButton" class="button">Previous</button>
+                <button id="nextButton" class="button">Next</button>
             </div>
             <div id="cardCounter" style="text-align: center; margin-top: 5px;"></div> <!-- Card counter display -->
         </body>
