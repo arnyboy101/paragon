@@ -48,6 +48,13 @@ class HTMLGenerator:
                     color: #333; /* Assuming you want a darker color for the text */
                     padding: 20px;
                 }}
+                /* Flex container for the main layout */
+                .main-container {{
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: flex-start;
+                }}
                 .title {{
                     text-align: center;
                     font-family: 'Times New Roman', serif;
@@ -60,6 +67,10 @@ class HTMLGenerator:
                     font-family: 'Arial', sans-serif;
                     font-size: 20px;
                     margin-bottom: 2em; /* Add some space below the authors */
+                }}
+                .title, .authors {{
+                    z-index: 10; /* Ensures these elements stay above the cards */
+                    position: relative; /* Needed to apply z-index */
                 }}
                 .card-container {{
                     display: flex;
@@ -76,6 +87,9 @@ class HTMLGenerator:
                     width: 45%;  /* 45% width with 10px margin on each side */
                     box-sizing: border-box;
                     cursor: pointer; /* Add cursor pointer to indicate clickability */
+                    border: 2px solid black; /* Add black border */
+                    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2); /* Add shadow effect */
+                    transition: transform 0.5s ease; /* Smooth transition for sliding effect */
                 }}
                 .subheading {{
                     font-size: 18px;
@@ -108,32 +122,68 @@ class HTMLGenerator:
                     transform: translateY(4px); /* Move the button up slightly on hover */
                 }}
 
+                 /* Add sliding animations */
+                @keyframes slideIn {{
+                    from {{
+                        transform: translateX(50%);
+                        opacity: 0;
+                    }}
+                    to {{
+                        transform: translateX(0);
+                        opacity: 1;
+                    }}
+                }}
+
+                @keyframes slideOut {{
+                    from {{
+                        transform: translateX(0);
+                        opacity: 1;
+                    }}
+                    to {{
+                        transform: translateX(-50%);
+                        opacity: 0;
+                    }}
+                }}
+
+                /* Initial state of the card when it's not active */
+                .card {{
+                    display: none;
+                    left: 0;
+                    right: 0;
+                    position: static
+                }}
+
+                /* State of the card when it's active */
+                .card.active-card {{
+                    display: block;
+                    animation: slideIn 0.5s;
+                }}
+
+                /* State of the card when it's being hidden */
+                .card.exit-card {{
+                    animation: slideOut 0.5s;
+                }}
+
             </style>
             <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
             <script>
                 $(document).ready(function() {{
                     var currentCard = 0;
                     var totalCards = $(".card").length;
-
-                    $(".card").hide();
-                    $(".card").eq(currentCard).show();
-
-                    updateButtonVisibility(); // Call on page load to initialize the counter
+                    $(".card").eq(currentCard).addClass('active-card');
 
                     $("#nextButton").click(function() {{
                         if (currentCard < totalCards - 1) {{
-                            $(".card").eq(currentCard).hide();
+                            transitionCard(currentCard, currentCard + 1);
                             currentCard++;
-                            $(".card").eq(currentCard).show();
                             updateButtonVisibility();
                         }}
                     }});
 
                     $("#prevButton").click(function() {{
                         if (currentCard > 0) {{
-                            $(".card").eq(currentCard).hide();
+                            transitionCard(currentCard, currentCard - 1);
                             currentCard--;
-                            $(".card").eq(currentCard).show();
                             updateButtonVisibility();
                         }}
                     }});
@@ -141,18 +191,26 @@ class HTMLGenerator:
                     function updateButtonVisibility() {{
                         $("#prevButton").toggle(currentCard > 0);
                         $("#nextButton").toggle(currentCard < totalCards - 1);
-                        $("#cardCounter").text((currentCard + 1) + " of " + totalCards); // Update the counter text
+                        $("#cardCounter").text((currentCard + 1) + " of " + totalCards);
                     }}
 
+                    function transitionCard(oldCard, newCard) {{
+                        $(".card").eq(oldCard).removeClass('active-card').addClass('exit-card');
+                        setTimeout(function() {{
+                            $(".card").eq(oldCard).hide().removeClass('exit-card');
+                            $(".card").eq(newCard).show().addClass('active-card');
+                        }}, 500); // Timeout matches animation duration
+                    }}
                 }});
         </script>
 
         <title>{self.title} Infographic</title>
         </head>
         <body>
+            <div class="main-container">
             <div class="title">{self.title}</div>
             <div class="authors">Authors: {self.authors}</div>
-            <div class="card-container">
+            <div class="card-container" style="position: relative;"> <!-- Updated to relative positioning -->
         """
 
         # Add subheadings to HTML content
@@ -174,6 +232,7 @@ class HTMLGenerator:
                 <button id="nextButton" class="button">Next</button>
             </div>
             <div id="cardCounter" style="text-align: center; margin-top: 5px;"></div> <!-- Card counter display -->
+        </div> 
         </body>
         </html>
         """
