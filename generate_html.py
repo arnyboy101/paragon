@@ -30,7 +30,9 @@ class HTMLGenerator:
         if color_scheme not in color_schemes:
             raise ValueError("Invalid color scheme")
 
-        background_color, box_color = color_schemes[color_scheme]
+        # You can directly assign the new colors here if they are not part of a selectable scheme
+        background_color = "#C2A384"
+        box_color = "#D89F67"
 
         # Build HTML content
         html_content = f"""
@@ -41,16 +43,23 @@ class HTMLGenerator:
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
                 body {{
-                    background-color: {background_color};
+                    background-color: {background_color}; /* Updated background color */
                     font-family: 'Helvetica', sans-serif;
-                }}
-                .banner {{
-                    background-color: {box_color};
+                    color: #333; /* Assuming you want a darker color for the text */
                     padding: 20px;
+                }}
+                .title {{
                     text-align: center;
                     font-family: 'Times New Roman', serif;
-                    font-size: 24px;
+                    font-size: 28px;
                     font-weight: bold;
+                    margin-bottom: 0.5em; /* Add some space below the title */
+                }}
+                .authors {{
+                    text-align: center;
+                    font-family: 'Arial', sans-serif;
+                    font-size: 20px;
+                    margin-bottom: 2em; /* Add some space below the authors */
                 }}
                 .card-container {{
                     display: flex;
@@ -118,10 +127,8 @@ class HTMLGenerator:
         <title>{self.title} Infographic</title>
         </head>
         <body>
-            <div class="banner">
-                <div>{self.title}</div>
-                <div>Authors: {self.authors}</div>
-            </div>
+            <div class="title">{self.title}</div>
+            <div class="authors">Authors: {self.authors}</div>
             <div class="card-container">
         """
 
