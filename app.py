@@ -1,3 +1,4 @@
+import base64
 from flask import Flask, render_template, request, jsonify
 from ocr import ParsePDF
 from generate_html import HTMLGenerator  # Import HTMLGenerator instead of PDFGenerator
@@ -70,22 +71,26 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    print("Received Content-Type:", request.headers.get('Content-Type'))
+
     if 'file' not in request.files:
         return jsonify({"error": "No file provided"})
 
-    file = request.files['file']
-
-    if file.filename == '':
-        return jsonify({"error": "No selected file"})
+    pdf_file = request.files['file']
+    article_type = request.form.get('articleType')
+    summary_type = request.form.get('summaryType')
 
     try:
-        # Save the uploaded PDF file
-        file_path = 'uploads/' + file.filename
-        file.save(file_path)
+        # Save the uploaded PDF file to a temporary location
+        file_path = 'uploads/' + pdf_file.filename
+        pdf_file.save(file_path)
 
-        # Process the PDF
-        generation_data = process_html(file_path)
+        # Use the ParsePDF class to process the uploaded PDF
+        ocr = ParsePDF()
+        generation_data = ocr.convert_to_summarize_format(file_path)
+        # Here you can integrate the article_type and summary_type with your logic
 
+        # Return a JSON response with success and file_path
         return jsonify({"success": True, "file_path": file_path, "generation_data": generation_data})
 
     except Exception as e:
@@ -104,6 +109,5 @@ def play_audio():
             return jsonify({"error": "Failed to convert to audio"})
 
     return jsonify({"error": "No data to convert"})
-
 if __name__ == '__main__':
     app.run(debug=True, port=8009)
