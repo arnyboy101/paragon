@@ -32,7 +32,7 @@
 
     <!-- Upload PDF Section -->
     <div style="text-align: center; margin: 20px;">
-        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" style="border: 2px solid #333; padding: 20px; background-color: #fff; border-radius: 10px; display: inline-block;">
+        <form id="uploadForm" action="/upload" method="post">
             <label for="file" style="display: block; margin-bottom: 10px; font-size: 1.2em;">Choose a PDF file:</label>
             <input type="file" name="file" accept=".pdf" required style="display: block; margin: 0 auto;">
             <button type="submit" style="margin-top: 10px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">Upload PDF</button>
@@ -56,51 +56,31 @@
     </div>
     <script>
         document.getElementById('uploadForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-            document.getElementById('loadingBox').style.display = 'block';
-            var formElements = document.getElementById('uploadForm').elements;
-            for (var i = 0; i < formElements.length; i++) {
-                formElements[i].disabled = true;
-            }
+        event.preventDefault();
+        document.getElementById('loadingBox').style.display = 'block';
 
-            var formData = new FormData(this);
+        var articleType = document.querySelector('input[name="articleType"]:checked').value;
+        var summaryType = document.querySelector('input[name="summaryType"]:checked').value;
+        var file = document.querySelector('input[type="file"]').files[0];
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var formData = new FormData();  // Use FormData to send file
+            formData.append('articleType', articleType);
+            formData.append('summaryType', summaryType);
+            formData.append('file', file);
 
             fetch('/upload', {
                 method: 'POST',
-                body: formData
+                body: formData  // Use FormData for file upload
             })
             .then(response => response.json())
             .then(data => {
                 document.getElementById('loadingBox').style.display = 'none';
 
                 if (data.success) {
-                    document.getElementById('resultBox').style.display = 'block';
-
-                    // Add event listener for the "Play Audio" button
-                    document.getElementById('playAudioButton').addEventListener('click', function() {
-                        // Display loading message during audio conversion
-                        document.getElementById('loadingBox').style.display = 'block';
-
-                        // Trigger the /play_audio endpoint
-                        fetch('/play_audio', {
-                            method: 'POST'
-                        })
-                        .then(response => response.json())
-                        .then(audioData => {
-                            document.getElementById('loadingBox').style.display = 'none';
-
-                            if (audioData.success) {
-                                // Placeholder for play audio functionality
-                                alert('Playing audio...');
-                            } else {
-                                alert('Error: ' + audioData.error);
-                            }
-                        })
-                        .catch(error => {
-                            document.getElementById('loadingBox').style.display = 'none';
-                            alert('Error: ' + error.message);
-                        });
-                    });
+                    // Call a function to enable the "Play Audio" button
+                    enablePlayAudioButton();
 
                     // Display the infographic saved message
                     var infographicSavedMessage = document.getElementById('infographicSavedMessage');
@@ -113,7 +93,41 @@
                 document.getElementById('loadingBox').style.display = 'none';
                 alert('Error: ' + error.message);
             });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Add a new function to enable the "Play Audio" button
+    function enablePlayAudioButton() {
+        var playAudioButton = document.getElementById('playAudioButton');
+        playAudioButton.style.display = 'block';
+
+        // Add event listener for the "Play Audio" button
+        playAudioButton.addEventListener('click', function() {
+            // Display loading message during audio conversion
+            document.getElementById('loadingBox').style.display = 'block';
+
+            // Trigger the /play_audio endpoint
+            fetch('/play_audio', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(audioData => {
+                document.getElementById('loadingBox').style.display = 'none';
+
+                if (audioData.success) {
+                    // Placeholder for play audio functionality
+                    alert('Playing audio...');
+                } else {
+                    alert('Error: ' + audioData.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingBox').style.display = 'none';
+                alert('Error: ' + error.message);
+            });
         });
+        }
     </script>
 </body>
 </html>
