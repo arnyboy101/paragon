@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory, url_for 
 from ocr import ParsePDF
 from generate_html import HTMLGenerator  # Import HTMLGenerator instead of PDFGenerator
 from summarize import TextSummarizer
 from speech import TextToSpeechConverter
+import os
 
 app = Flask(__name__)
 
@@ -138,15 +139,21 @@ def upload():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+# Route to serve infographic_page.html
+@app.route('/infographic')
+def serve_infographic():
+    return send_from_directory('output', 'infographic_page.html')
+
+
 @app.route('/play_audio', methods=['POST'])
 def play_audio():
     global summarize_dict_output
 
     if summarize_dict_output is not None:
         audio_file_path = audio_helper()
-
-        if audio_file_path is not None:
-            return jsonify({"success": True, "audio_file_path": audio_file_path})
+        if audio_file_path:
+            audio_url = url_for('static', filename=os.path.basename(audio_file_path), _external=True)
+            return jsonify({"success": True, "audio_url": audio_url})
         else:
             return jsonify({"error": "Failed to convert to audio"})
 
