@@ -88,6 +88,10 @@ def upload():
         # Use the ParsePDF class to process the uploaded PDF
         ocr = ParsePDF()
         generation_data = ocr.convert_to_summarize_format(file_path)
+        
+        # Process the PDF and generate HTML
+        generation_data = process_html(file_path)
+
         # Here you can integrate the article_type and summary_type with your logic
 
         # Return a JSON response with success and file_path
@@ -95,6 +99,7 @@ def upload():
 
     except Exception as e:
         return jsonify({"error": str(e)})
+
 
 @app.route('/play_audio', methods=['POST'])
 def play_audio():
@@ -109,5 +114,6 @@ def play_audio():
             return jsonify({"error": "Failed to convert to audio"})
 
     return jsonify({"error": "No data to convert"})
+
 if __name__ == '__main__':
     app.run(debug=True, port=8009)

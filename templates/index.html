@@ -56,71 +56,78 @@
     </div>
     <script>
         document.getElementById('uploadForm').addEventListener('submit', function (event) {
-            event.preventDefault();
+        event.preventDefault();
+        document.getElementById('loadingBox').style.display = 'block';
+
+        var articleType = document.querySelector('input[name="articleType"]:checked').value;
+        var summaryType = document.querySelector('input[name="summaryType"]:checked').value;
+        var file = document.querySelector('input[type="file"]').files[0];
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var formData = new FormData();  // Use FormData to send file
+            formData.append('articleType', articleType);
+            formData.append('summaryType', summaryType);
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData  // Use FormData for file upload
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingBox').style.display = 'none';
+
+                if (data.success) {
+                    // Call a function to enable the "Play Audio" button
+                    enablePlayAudioButton();
+
+                    // Display the infographic saved message
+                    var infographicSavedMessage = document.getElementById('infographicSavedMessage');
+                    infographicSavedMessage.style.display = 'block';
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingBox').style.display = 'none';
+                alert('Error: ' + error.message);
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Add a new function to enable the "Play Audio" button
+    function enablePlayAudioButton() {
+        var playAudioButton = document.getElementById('playAudioButton');
+        playAudioButton.style.display = 'block';
+
+        // Add event listener for the "Play Audio" button
+        playAudioButton.addEventListener('click', function() {
+            // Display loading message during audio conversion
             document.getElementById('loadingBox').style.display = 'block';
 
-            var articleType = document.querySelector('input[name="articleType"]:checked').value;
-            var summaryType = document.querySelector('input[name="summaryType"]:checked').value;
-            var file = document.querySelector('input[type="file"]').files[0];
+            // Trigger the /play_audio endpoint
+            fetch('/play_audio', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(audioData => {
+                document.getElementById('loadingBox').style.display = 'none';
 
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var formData = new FormData();
-                formData.append('articleType', articleType);
-                formData.append('summaryType', summaryType);
-                formData.append('file', file);
-
-                fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('loadingBox').style.display = 'none';
-
-                    if (data.success) {
-                        document.getElementById('resultBox').style.display = 'block';
-                        
-                        // Add event listener for the "Play Audio" button
-                        document.getElementById('playAudioButton').addEventListener('click', function() {
-                            // Display loading message during audio conversion
-                            document.getElementById('loadingBox').style.display = 'block';
-
-                            // Trigger the /play_audio endpoint
-                            fetch('/play_audio', {
-                                method: 'POST'
-                            })
-                            .then(response => response.json())
-                            .then(audioData => {
-                                document.getElementById('loadingBox').style.display = 'none';
-
-                                if (audioData.success) {
-                                    // Placeholder for play audio functionality
-                                    alert('Playing audio...');
-                                } else {
-                                    alert('Error: ' + audioData.error);
-                                }
-                            })
-                            .catch(error => {
-                                document.getElementById('loadingBox').style.display = 'none';
-                                alert('Error: ' + error.message);
-                            });
-                        });
-
-                        // Display the infographic saved message
-                        var infographicSavedMessage = document.getElementById('infographicSavedMessage');
-                        infographicSavedMessage.style.display = 'block';
-                    } else {
-                        alert('Error: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('loadingBox').style.display = 'none';
-                    alert('Error: ' + error.message);
-                });
-            };
-            reader.readAsDataURL(file);
+                if (audioData.success) {
+                    // Placeholder for play audio functionality
+                    alert('Playing audio...');
+                } else {
+                    alert('Error: ' + audioData.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingBox').style.display = 'none';
+                alert('Error: ' + error.message);
+            });
         });
+        }
     </script>
 </body>
 </html>
