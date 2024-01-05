@@ -12,7 +12,7 @@ class HTMLGenerator:
         output_folder = data_dict.get("output_folder", ".")
         color_scheme = data_dict.get("color_scheme", "Evening")
 
-        html_file = f"{output_folder}/{title.replace(' ', '_')}_infographic.html"
+        html_file = f"{output_folder}/infographic_page.html"
         html_content = self.create_infographic(color_scheme)
 
         with open(html_file, "w", encoding="utf-8") as html_file:
@@ -30,7 +30,9 @@ class HTMLGenerator:
         if color_scheme not in color_schemes:
             raise ValueError("Invalid color scheme")
 
-        background_color, box_color = color_schemes[color_scheme]
+        # You can directly assign the new colors here if they are not part of a selectable scheme
+        background_color = "#C2A384"
+        box_color = "#D89F67"
 
         # Build HTML content
         html_content = f"""
@@ -41,16 +43,34 @@ class HTMLGenerator:
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
                 body {{
-                    background-color: {background_color};
+                    background-color: {background_color}; /* Updated background color */
                     font-family: 'Helvetica', sans-serif;
-                }}
-                .banner {{
-                    background-color: {box_color};
+                    color: #333; /* Assuming you want a darker color for the text */
                     padding: 20px;
+                }}
+                /* Flex container for the main layout */
+                .main-container {{
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: flex-start;
+                }}
+                .title {{
                     text-align: center;
                     font-family: 'Times New Roman', serif;
-                    font-size: 24px;
+                    font-size: 28px;
                     font-weight: bold;
+                    margin-bottom: 0.5em; /* Add some space below the title */
+                }}
+                .authors {{
+                    text-align: center;
+                    font-family: 'Arial', sans-serif;
+                    font-size: 20px;
+                    margin-bottom: 2em; /* Add some space below the authors */
+                }}
+                .title, .authors {{
+                    z-index: 10; /* Ensures these elements stay above the cards */
+                    position: relative; /* Needed to apply z-index */
                 }}
                 .card-container {{
                     display: flex;
@@ -67,6 +87,9 @@ class HTMLGenerator:
                     width: 45%;  /* 45% width with 10px margin on each side */
                     box-sizing: border-box;
                     cursor: pointer; /* Add cursor pointer to indicate clickability */
+                    border: 2px solid black; /* Add black border */
+                    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2); /* Add shadow effect */
+                    transition: transform 0.5s ease; /* Smooth transition for sliding effect */
                 }}
                 .subheading {{
                     font-size: 18px;
@@ -76,32 +99,91 @@ class HTMLGenerator:
                 .explanation {{
                     font-size: 14px;
                 }}
+                .button {{
+                    background-color: {box_color}; /* Button color */
+                    color: white; /* Text color */
+                    border: none;
+                    padding: 10px 20px;
+                    text-align: center;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-size: 16px;
+                    margin: 4px 2px;
+                    transition-duration: 0.4s; /* Smooth transition for hover effect */
+                    cursor: pointer;
+                    border-radius: 5px; /* Rounded corners for buttons */
+                    box-shadow: 0 9px #999; /* Box shadow for a 3D effect */
+                }}
+
+                .button:hover {{
+                    background-color: #555; /* Button color on hover */
+                    color: white; /* Text color on hover */
+                    box-shadow: 0 5px #666; /* Box shadow on hover */
+                    transform: translateY(4px); /* Move the button up slightly on hover */
+                }}
+
+                 /* Add sliding animations */
+                @keyframes slideIn {{
+                    from {{
+                        transform: translateX(50%);
+                        opacity: 0;
+                    }}
+                    to {{
+                        transform: translateX(0);
+                        opacity: 1;
+                    }}
+                }}
+
+                @keyframes slideOut {{
+                    from {{
+                        transform: translateX(0);
+                        opacity: 1;
+                    }}
+                    to {{
+                        transform: translateX(-50%);
+                        opacity: 0;
+                    }}
+                }}
+
+                /* Initial state of the card when it's not active */
+                .card {{
+                    display: none;
+                    left: 0;
+                    right: 0;
+                    position: static
+                }}
+
+                /* State of the card when it's active */
+                .card.active-card {{
+                    display: block;
+                    animation: slideIn 0.5s;
+                }}
+
+                /* State of the card when it's being hidden */
+                .card.exit-card {{
+                    animation: slideOut 0.5s;
+                }}
+
             </style>
             <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
             <script>
                 $(document).ready(function() {{
                     var currentCard = 0;
                     var totalCards = $(".card").length;
-
-                    $(".card").hide();
-                    $(".card").eq(currentCard).show();
-
-                    updateButtonVisibility();
+                    $(".card").eq(currentCard).addClass('active-card');
 
                     $("#nextButton").click(function() {{
                         if (currentCard < totalCards - 1) {{
-                            $(".card").eq(currentCard).hide();
+                            transitionCard(currentCard, currentCard + 1);
                             currentCard++;
-                            $(".card").eq(currentCard).show();
                             updateButtonVisibility();
                         }}
                     }});
 
                     $("#prevButton").click(function() {{
                         if (currentCard > 0) {{
-                            $(".card").eq(currentCard).hide();
+                            transitionCard(currentCard, currentCard - 1);
                             currentCard--;
-                            $(".card").eq(currentCard).show();
                             updateButtonVisibility();
                         }}
                     }});
@@ -109,39 +191,48 @@ class HTMLGenerator:
                     function updateButtonVisibility() {{
                         $("#prevButton").toggle(currentCard > 0);
                         $("#nextButton").toggle(currentCard < totalCards - 1);
+                        $("#cardCounter").text((currentCard + 1) + " of " + totalCards);
+                    }}
+
+                    function transitionCard(oldCard, newCard) {{
+                        $(".card").eq(oldCard).removeClass('active-card').addClass('exit-card');
+                        setTimeout(function() {{
+                            $(".card").eq(oldCard).hide().removeClass('exit-card');
+                            $(".card").eq(newCard).show().addClass('active-card');
+                        }}, 500); // Timeout matches animation duration
                     }}
                 }});
-            </script>
+        </script>
 
-            <title>{self.title} Infographic</title>
+        <title>{self.title} Infographic</title>
         </head>
         <body>
-            <div class="banner">
-                <div>{self.title}</div>
-                <div>Authors: {self.authors}</div>
-            </div>
-            <div class="card-container">
+            <div class="main-container">
+            <div class="title">{self.title}</div>
+            <div class="authors">Authors: {self.authors}</div>
+            <div class="card-container" style="position: relative;"> <!-- Updated to relative positioning -->
         """
 
         # Add subheadings to HTML content
         for subheading_data in self.subheadings:
-            if len(subheading_data["explanation"].split(" ")) <= 5:
-                explanation_lines = self.wrap_text(subheading_data["explanation"], 14, 400 - 2 * 20)
-                explanation_text = "<br>".join(explanation_lines)
+            explanation_lines = self.wrap_text(subheading_data["explanation"], 14, 400 - 2 * 20)
+            explanation_text = "<br>".join(explanation_lines)
 
-                html_content += f"""
-                <div class="card">
-                    <div class="subheading">{subheading_data["subheading"]}</div>
-                    <div class="explanation">{explanation_text}</div>
-                </div>
-                """
+            html_content += f"""
+            <div class="card">
+                <div class="subheading">{subheading_data["subheading"]}</div>
+                <div class="explanation">{explanation_text}</div>
+            </div>
+            """
 
         html_content += """
             </div>
-            <div style="text-align: center;">
-                <button id="prevButton">Previous</button>
-                <button id="nextButton">Next</button>
+            <div style="text-align: center; margin-top: 10px;">
+                <button id="prevButton" class="button">Previous</button>
+                <button id="nextButton" class="button">Next</button>
             </div>
+            <div id="cardCounter" style="text-align: center; margin-top: 5px;"></div> <!-- Card counter display -->
+        </div> 
         </body>
         </html>
         """

@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory, url_for 
 from ocr import ParsePDF
 from generate_html import HTMLGenerator  # Import HTMLGenerator instead of PDFGenerator
 from summarize import TextSummarizer
 from speech import TextToSpeechConverter
+import os
 
 app = Flask(__name__)
 
@@ -34,10 +35,45 @@ def summarize_dict(data_dict):
 
     return summarize_dict_output
 
-def process_html(file_path):  # Update function name to reflect HTML generation
+def process_html(file_path, article_type, summary_type):  # Update function name to reflect HTML generation
     ocr = ParsePDF()
     generation_data = ocr.convert_to_summarize_format(file_path)
-    generation_data = summarize_dict(generation_data)
+
+    # Constants for article types
+    RESEARCH_PAPER = 'Research Paper'
+    LEGAL_DOCUMENTS = 'Legal Documents'
+    NEWS_ARTICLES = 'News Articles'
+
+    # Constants for summary types
+    CONCISE_OVERVIEW = 'Concise Overview'
+    DETAILED_OVERVIEW = 'Section-by-Section Analysis'
+
+    # Process the PDF based on article_type and summary_type
+    if article_type == RESEARCH_PAPER:
+        if summary_type == CONCISE_OVERVIEW:
+            # Code for processing Research Paper with Concise Overview
+            generation_data = summarize_dict(generation_data)
+        elif summary_type == DETAILED_OVERVIEW:
+            # Code for processing Research Paper with Section-by-Section Analysis
+            generation_data = summarize_dict(generation_data)
+
+    elif article_type == LEGAL_DOCUMENTS:
+        # Similar structure for Legal Documents
+        if summary_type == CONCISE_OVERVIEW:
+            generation_data = summarize_dict(generation_data)
+        elif summary_type == DETAILED_OVERVIEW:
+            generation_data = summarize_dict(generation_data)
+
+    elif article_type == NEWS_ARTICLES:
+        # Similar structure for News Articles
+        if summary_type == CONCISE_OVERVIEW:
+            generation_data = summarize_dict(generation_data)
+        elif summary_type == DETAILED_OVERVIEW:
+            generation_data = summarize_dict(generation_data)
+    else:
+        # Handle unexpected article_type values
+        return jsonify({"error": "Invalid article type"})
+ 
     
     html_generator = HTMLGenerator(  # Use HTMLGenerator instead of PDFGenerator
         title=generation_data['title'],
@@ -70,13 +106,25 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    # Check if the file part is in the request
     if 'file' not in request.files:
         return jsonify({"error": "No file provided"})
 
     file = request.files['file']
-
+    
+    # Check if a file is selected
     if file.filename == '':
         return jsonify({"error": "No selected file"})
+
+    # Check if article type is selected
+    article_type = request.form.get('articleType')
+    if not article_type:
+        return jsonify({"error": "Article type not selected"})
+
+    # Check if summary type is selected
+    summary_type = request.form.get('summaryType')
+    if not summary_type:
+        return jsonify({"error": "Summary type not selected"})
 
     try:
         # Save the uploaded PDF file
@@ -84,12 +132,18 @@ def upload():
         file.save(file_path)
 
         # Process the PDF
-        generation_data = process_html(file_path)
+        generation_data = process_html(file_path, article_type, summary_type)
 
         return jsonify({"success": True, "file_path": file_path, "generation_data": generation_data})
 
     except Exception as e:
         return jsonify({"error": str(e)})
+
+# Route to serve infographic_page.html
+@app.route('/infographic')
+def serve_infographic():
+    return send_from_directory('output', 'infographic_page.html')
+
 
 @app.route('/play_audio', methods=['POST'])
 def play_audio():
@@ -97,13 +151,13 @@ def play_audio():
 
     if summarize_dict_output is not None:
         audio_file_path = audio_helper()
-
-        if audio_file_path is not None:
-            return jsonify({"success": True, "audio_file_path": audio_file_path})
+        if audio_file_path:
+            audio_url = url_for('static', filename=os.path.basename(audio_file_path), _external=True)
+            return jsonify({"success": True, "audio_url": audio_url})
         else:
             return jsonify({"error": "Failed to convert to audio"})
 
     return jsonify({"error": "No data to convert"})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8009)
+    app.run(debug=True, port=8010)
