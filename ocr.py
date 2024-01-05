@@ -36,3 +36,19 @@ class ParsePDF:
             "color_scheme": "Evening",
             "output_folder": "./output"
         }
+
+    def convert_to_legal_format(self,pdf_file):
+        article_dict = self.parse_pdf_to_dict(pdf_file)
+        subheadings = []
+        for section in article_dict.get("sections", []):
+            subheading_data = {
+                "subheading": section.get("heading", ""),
+                "explanation": section.get("text", "")
+            }
+            subheadings.append(subheading_data)
+
+        return {
+            "subheadings": subheadings
+            }
+
+    

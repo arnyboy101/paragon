@@ -3,17 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paradigm.ai</title>
+    <title>Paragon.ai</title>
 </head>
-<body style="font-family: 'Arial', sans-serif; background-color: #fdf4f4; margin: 0; padding: 0;">
+<body style="font-family: 'Arial', sans-serif; background-color: #f2f2f2; margin: 0; padding: 0;">
 
     <!-- Banner Section -->
     <div style="background-color: #333; color: white; text-align: center; padding: 20px;">
-        <h1 style="margin: 0; font-size: 2em;">Paradigm.ai</h1>
+        <h1 style="margin: 0; font-size: 2em;">Paragon.ai</h1>
         <p style="margin: 0; font-size: 1.2em;">Make your big ideas, bite-sized</p>
     </div>
-    <div class="form-section"; style="text-align: center; margin: 20px;">
-        <p>Select your type of article</p>
+
+<!-- Form for Article Type, Summary Type, and File Upload -->
+<form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" style="text-align: center; margin: 20px;">
+
+    <!-- Article Type Selection -->
+    <div class="form-section" style="margin-bottom: 20px;">
+        <p><b>Select your type of article</b></p>
         <input type="radio" name="articleType" id="research" value="Research Paper">
         <label for="research">Research Paper</label>
         <input type="radio" name="articleType" id="legal" value="Legal Documents">
@@ -22,22 +27,22 @@
         <label for="news">News Articles</label>
     </div>
 
-    <div class="form-section"; style="text-align: center; margin: 20px;">
-        <p>Type of Summary</p>
+    <!-- Summary Type Selection -->
+    <div class="form-section" style="margin-bottom: 20px;">
+        <p><b>Type of summary</b></p>
         <input type="radio" name="summaryType" id="concise" value="Concise Overview">
         <label for="concise">Concise Overview</label>
         <input type="radio" name="summaryType" id="detailed" value="Section-by-Section Analysis">
         <label for="detailed">Section-by-Section Analysis</label>
     </div>
 
-    <!-- Upload PDF Section -->
-    <div style="text-align: center; margin: 20px;">
-        <form id="uploadForm" action="/upload" method="post">
-            <label for="file" style="display: block; margin-bottom: 10px; font-size: 1.2em;">Choose a PDF file:</label>
-            <input type="file" name="file" accept=".pdf" required style="display: block; margin: 0 auto;">
-            <button type="submit" style="margin-top: 10px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">Upload PDF</button>
-        </form>
+    <!-- File Upload Section with outline and different background -->
+    <div style="border: 2px solid #333; padding: 20px; background-color: #fff; border-radius: 10px; display: inline-block;">
+        <label for="file" style="display: block; margin-bottom: 10px; font-size: 1.2em;">Choose a PDF file:</label>
+        <input type="file" name="file" accept=".pdf" required style="display: block; margin: 0 auto;">
+        <button type="submit" style="margin-top: 10px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">Upload PDF</button>
     </div>
+</form>
 
     <!-- Loading Section -->
     <div id="loadingBox" style="text-align: center; display: none; padding: 20px;">
@@ -49,42 +54,69 @@
     <div id="resultBox" style="text-align: center; display: none; padding: 20px;">
         <p style="margin: 0; font-size: 1.5em;">PDF processed successfully!</p>
         <button id="playAudioButton" style="margin-top: 20px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            <img src="data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 5V19L11 12L4 5ZM12 19V5L19 12L12 19Z' fill='white'/%3E%3C/svg%3E" alt="Play Audio" style="width: 20px; height: 20px; margin-right: 10px;" />
             Play audio
         </button>
-        <p id="infographicSavedMessage" style="display: none; margin-top: 10px; font-size: 1.2em;">Infographic saved to <strong>./output</strong> directory</p>
+        <button id="displayInfographicButton" style="margin-top: 20px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Display Infographic
+        </button>
     </div>
+
     <script>
+        // Attach the event listener for the "Play Audio" button
+        document.getElementById('playAudioButton').addEventListener('click', function() {
+            // Show loading indication
+            document.getElementById('loadingBox').style.display = 'block';
+
+            fetch('/play_audio', { method: 'POST' })
+            .then(response => response.json())
+            .then(audioData => {
+                if(audioData.success) {
+                    var audio = new Audio(audioData.audio_url);
+                    audio.play()
+                    .then(() => {
+                        // Hide loading indication once audio starts playing
+                        document.getElementById('loadingBox').style.display = 'none';
+                    })
+                    .catch(e => {
+                        // Hide loading indication and show error
+                        document.getElementById('loadingBox').style.display = 'none';
+                        console.error('Playback failed.', e);
+                    });
+                } else {
+                    // Hide loading indication and show error
+                    document.getElementById('loadingBox').style.display = 'none';
+                    alert('Error: ' + audioData.error);
+                }
+            })
+            .catch(error => {
+                // Hide loading indication and show error
+                document.getElementById('loadingBox').style.display = 'none';
+                console.error('Error fetching audio URL.', error);
+            });
+        });
+    
+        // Attach the event listener for the "Display Infographic" button
+        document.getElementById('displayInfographicButton').addEventListener('click', function() {
+            window.open('/infographic', '_blank');
+        });
+    
+        // Handle form submission
         document.getElementById('uploadForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-        document.getElementById('loadingBox').style.display = 'block';
-
-        var articleType = document.querySelector('input[name="articleType"]:checked').value;
-        var summaryType = document.querySelector('input[name="summaryType"]:checked').value;
-        var file = document.querySelector('input[type="file"]').files[0];
-
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var formData = new FormData();  // Use FormData to send file
-            formData.append('articleType', articleType);
-            formData.append('summaryType', summaryType);
-            formData.append('file', file);
-
+            event.preventDefault();
+            document.getElementById('loadingBox').style.display = 'block';
+    
+            var formData = new FormData(this);
+    
             fetch('/upload', {
                 method: 'POST',
-                body: formData  // Use FormData for file upload
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
                 document.getElementById('loadingBox').style.display = 'none';
-
+    
                 if (data.success) {
-                    // Call a function to enable the "Play Audio" button
-                    enablePlayAudioButton();
-
-                    // Display the infographic saved message
-                    var infographicSavedMessage = document.getElementById('infographicSavedMessage');
-                    infographicSavedMessage.style.display = 'block';
+                    document.getElementById('resultBox').style.display = 'block';
                 } else {
                     alert('Error: ' + data.error);
                 }
@@ -93,41 +125,8 @@
                 document.getElementById('loadingBox').style.display = 'none';
                 alert('Error: ' + error.message);
             });
-        };
-        reader.readAsDataURL(file);
-    });
-
-    // Add a new function to enable the "Play Audio" button
-    function enablePlayAudioButton() {
-        var playAudioButton = document.getElementById('playAudioButton');
-        playAudioButton.style.display = 'block';
-
-        // Add event listener for the "Play Audio" button
-        playAudioButton.addEventListener('click', function() {
-            // Display loading message during audio conversion
-            document.getElementById('loadingBox').style.display = 'block';
-
-            // Trigger the /play_audio endpoint
-            fetch('/play_audio', {
-                method: 'POST'
-            })
-            .then(response => response.json())
-            .then(audioData => {
-                document.getElementById('loadingBox').style.display = 'none';
-
-                if (audioData.success) {
-                    // Placeholder for play audio functionality
-                    alert('Playing audio...');
-                } else {
-                    alert('Error: ' + audioData.error);
-                }
-            })
-            .catch(error => {
-                document.getElementById('loadingBox').style.display = 'none';
-                alert('Error: ' + error.message);
-            });
         });
-        }
     </script>
+    
 </body>
 </html>

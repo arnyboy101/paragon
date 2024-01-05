@@ -12,7 +12,7 @@ class HTMLGenerator:
         output_folder = data_dict.get("output_folder", ".")
         color_scheme = data_dict.get("color_scheme", "Evening")
 
-        html_file = f"{output_folder}/{title.replace(' ', '_')}_infographic.html"
+        html_file = f"{output_folder}/infographic_page.html"
         html_content = self.create_infographic(color_scheme)
 
         with open(html_file, "w", encoding="utf-8") as html_file:
