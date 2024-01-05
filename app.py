@@ -74,6 +74,7 @@ def process_html(file_path, article_type, summary_type):  # Update function name
         # Handle unexpected article_type values
         return jsonify({"error": "Invalid article type"})
  
+    audio_helper()
     
     html_generator = HTMLGenerator(  # Use HTMLGenerator instead of PDFGenerator
         title=generation_data['title'],
