@@ -74,8 +74,7 @@ def process_html(file_path, article_type, summary_type):  # Update function name
         # Handle unexpected article_type values
         return jsonify({"error": "Invalid article type"})
  
-    audio_helper()
-    
+   
     html_generator = HTMLGenerator(  # Use HTMLGenerator instead of PDFGenerator
         title=generation_data['title'],
         authors=generation_data['authors'],
@@ -159,6 +158,17 @@ def play_audio():
             return jsonify({"error": "Failed to convert to audio"})
 
     return jsonify({"error": "No data to convert"})
+
+@app.route('/generate_audio', methods=['POST'])
+def generate_audio():
+    try:
+        audio_file_path = audio_helper()
+        if audio_file_path:
+            return jsonify({"success": True, "audio_url": url_for('static', filename='output_audio.mp3')})
+        else:
+            return jsonify({"error": "Audio generation failed"})
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True, port=8010)

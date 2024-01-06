@@ -73,13 +73,12 @@
             window.open('/infographic', '_blank');
         });
     
-        // Handle form submission
         document.getElementById('uploadForm').addEventListener('submit', function (event) {
             event.preventDefault();
             document.getElementById('loadingBox').style.display = 'block';
-    
+
             var formData = new FormData(this);
-    
+
             fetch('/upload', {
                 method: 'POST',
                 body: formData
@@ -87,9 +86,10 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('loadingBox').style.display = 'none';
-    
+
                 if (data.success) {
                     document.getElementById('resultBox').style.display = 'block';
+                    // Do not automatically generate or play audio here
                 } else {
                     alert('Error: ' + data.error);
                 }
@@ -106,12 +106,28 @@
 
             // Event listener for the "Play Audio" button
             document.getElementById('playAudioButton').addEventListener('click', function() {
-                var audioPlayer = document.getElementById('audioPlayer');
-                audioPlayer.style.display = 'block'; // Show the Plyr player
+                document.getElementById('loadingBox').style.display = 'block'; // Show loading screen
 
-                // Optional: Start playing when shown
-                player.play();
-            });
+                fetch('/generate_audio', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loadingBox').style.display = 'none'; // Hide loading screen
+
+                    if (data.success) {
+                        var audioPlayer = document.getElementById('audioPlayer');
+                        audioPlayer.style.display = 'block'; // Show the Plyr player
+                        document.getElementById('plyrAudioPlayer').src = data.audio_url; // Update audio source
+                        const player = new Plyr('#plyrAudioPlayer');
+                        //player.play(); //This is to automatically play audio.
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loadingBox').style.display = 'none';
+                    alert('Error: ' + error.message);
+                });
+                });
         });
     </script>
     <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>   
