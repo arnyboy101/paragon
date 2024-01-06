@@ -74,6 +74,7 @@ def process_html(file_path, article_type, summary_type):  # Update function name
         # Handle unexpected article_type values
         return jsonify({"error": "Invalid article type"})
  
+    audio_helper()
     
     html_generator = HTMLGenerator(  # Use HTMLGenerator instead of PDFGenerator
         title=generation_data['title'],
@@ -93,7 +94,7 @@ def audio_helper():
             full_text += f"{subheading_data['subheading']}. {subheading_data['explanation']} "
 
         # Convert the full text to audio
-        converter = TextToSpeechConverter(full_text, output_dir='audio_output', language='en')
+        converter = TextToSpeechConverter(full_text, output_dir='static', language='en')
         audio_file_path = converter.convert_to_audio(filename='output_audio.mp3')
 
         return audio_file_path
@@ -152,7 +153,7 @@ def play_audio():
     if summarize_dict_output is not None:
         audio_file_path = audio_helper()
         if audio_file_path:
-            audio_url = url_for('static', filename=os.path.basename(audio_file_path), _external=True)
+            audio_url = url_for('static', filename='output_audio.mp3', _external=True)
             return jsonify({"success": True, "audio_url": audio_url})
         else:
             return jsonify({"error": "Failed to convert to audio"})
