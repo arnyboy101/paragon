@@ -64,36 +64,17 @@
     <script>
         // Attach the event listener for the "Play Audio" button
         document.getElementById('playAudioButton').addEventListener('click', function() {
-            // Show loading indication
-            document.getElementById('loadingBox').style.display = 'block';
+            // Create an Audio object
+            var audio = new Audio('/static/output_audio.mp3'); 
 
-            fetch('/play_audio', { method: 'POST' })
-            .then(response => response.json())
-            .then(audioData => {
-                if(audioData.success) {
-                    var audio = new Audio(audioData.audio_url);
-                    audio.play()
-                    .then(() => {
-                        // Hide loading indication once audio starts playing
-                        document.getElementById('loadingBox').style.display = 'none';
-                    })
-                    .catch(e => {
-                        // Hide loading indication and show error
-                        document.getElementById('loadingBox').style.display = 'none';
-                        console.error('Playback failed.', e);
-                    });
-                } else {
-                    // Hide loading indication and show error
-                    document.getElementById('loadingBox').style.display = 'none';
-                    alert('Error: ' + audioData.error);
-                }
-            })
-            .catch(error => {
-                // Hide loading indication and show error
-                document.getElementById('loadingBox').style.display = 'none';
-                console.error('Error fetching audio URL.', error);
+            // Play the audio
+            audio.play()
+            .catch(e => {
+                // Error handling if playback fails
+                console.error('Playback failed', e);
             });
         });
+
     
         // Attach the event listener for the "Display Infographic" button
         document.getElementById('displayInfographicButton').addEventListener('click', function() {
