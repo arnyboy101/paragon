@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paragon.ai</title>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css" />
 </head>
 <body style="font-family: 'Arial', sans-serif; background-color: #f2f2f2; margin: 0; padding: 0;">
 
@@ -53,6 +54,11 @@
     <!-- Result Section -->
     <div id="resultBox" style="text-align: center; display: none; padding: 20px;">
         <p style="margin: 0; font-size: 1.5em;">PDF processed successfully!</p>
+        <div id="audioPlayer" style="text-align: center; display: none;">
+            <audio id="plyrAudioPlayer" class="plyr" controls>
+                <source src="/static/output_audio.mp3" type="audio/mp3">
+            </audio>
+        </div>
         <button id="playAudioButton" style="margin-top: 20px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">
             Play audio
         </button>
@@ -61,21 +67,7 @@
         </button>
     </div>
 
-    <script>
-        // Attach the event listener for the "Play Audio" button
-        document.getElementById('playAudioButton').addEventListener('click', function() {
-            // Create an Audio object
-            var audio = new Audio('/static/output_audio.mp3'); 
-
-            // Play the audio
-            audio.play()
-            .catch(e => {
-                // Error handling if playback fails
-                console.error('Playback failed', e);
-            });
-        });
-
-    
+    <script>    
         // Attach the event listener for the "Display Infographic" button
         document.getElementById('displayInfographicButton').addEventListener('click', function() {
             window.open('/infographic', '_blank');
@@ -107,7 +99,21 @@
                 alert('Error: ' + error.message);
             });
         });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Plyr
+            const player = new Plyr('#plyrAudioPlayer');
+
+            // Event listener for the "Play Audio" button
+            document.getElementById('playAudioButton').addEventListener('click', function() {
+                var audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.style.display = 'block'; // Show the Plyr player
+
+                // Optional: Start playing when shown
+                player.play();
+            });
+        });
     </script>
-    
+    <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>   
 </body>
 </html>
